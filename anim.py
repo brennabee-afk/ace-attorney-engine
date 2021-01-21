@@ -697,14 +697,18 @@ def comments_to_scene(comments: List, **kwargs):
         for sentence in sentences:
             if len(sentence) > 90:
                 text_chunks = []
-                for chunk in wrap(sentence, 85):
+                text_wrap = wrap(sentence, 85)
+                for idx, chunk in enumerate(text_wrap):
                     if chunk[-1] in string.punctuation:
                         chunk_text = chunk
                     else:
-                        chunk_text = f"{chunk}..."
+                        if idx != len(text_wrap) - 1:
+                            chunk_text = f"{chunk}..."
+                        else:
+                            chunk_text = chunk
                     text_chunks.append(chunk_text)
-
                 joined_sentences.extend(text_chunks)
+                current_sentence = None
             else:
                 if current_sentence is not None and len(current_sentence) + len(sentence) + 1 <= 90:
                     current_sentence += " " + sentence
