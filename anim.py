@@ -698,21 +698,22 @@ def comments_to_scene(comments: List, **kwargs):
             if len(sentence) > 90:
                 text_chunks = []
                 for chunk in wrap(sentence, 85):
-                    if chunk is not None:
-                        if chunk[-1] in string.punctuation:
-                            chunk_text = f"{chunk}"
-                        else:
-                            chunk_text = f"{chunk}..."
-                        text_chunks.append(chunk_text)
+                    if chunk[-1] in string.punctuation:
+                        chunk_text = chunk
+                    else:
+                        chunk_text = f"{chunk}..."
+                    text_chunks.append(chunk_text)
 
                 joined_sentences.extend(text_chunks)
             else:
-                if current_sentence is not None and len(f"{current_sentence} {sentence}") <= 90:
+                if current_sentence is not None and len(current_sentence) + len(sentence) + 1 <= 90:
                     current_sentence += " " + sentence
                 else:
-                    joined_sentences.append(current_sentence)
+                    if current_sentence is not None:
+                        joined_sentences.append(current_sentence)
                     current_sentence = sentence
-        joined_sentences.append(current_sentence)
+        if current_sentence is not None:
+            joined_sentences.append(current_sentence)
         character_block = []
         character = comment.author.character
         main_emotion = random.choice(character_emotions[character]["neutral"])
