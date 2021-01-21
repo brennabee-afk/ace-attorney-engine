@@ -11,6 +11,8 @@ import random
 from textwrap import wrap
 import spacy
 from textblob import TextBlob
+from tqdm import tqdm
+import string
 
 nlp = spacy.load("en_core_web_sm")
 assets_folder = 'D:/Data/ace-attorney-reddit-bot-assets'
@@ -275,7 +277,7 @@ fps = 18
 def do_video(config: List[Dict]):
     scenes = []
     sound_effects = []
-    for scene in config:
+    for scene in tqdm(config, total=len(config), desc='creating video...'):
         bg = AnimImg(location_map[scene["location"]])
         arrow = AnimImg(f"{assets_folder}/arrow.png", x=235, y=170, w=15, h=15, key_x=5)
         textbox = AnimImg(f"{assets_folder}/textbox4.png", w=bg.w)
@@ -502,7 +504,8 @@ def do_audio(sound_effects: List[Dict]):
         f"{assets_folder}/Edgeworth - (English) objection.mp3"
     )
     default_objection = AudioSegment.from_mp3(f"{assets_folder}/Payne - Objection.mp3")
-    for obj in sound_effects:
+
+    for obj in tqdm(sound_effects, total=len(sound_effects), desc='creating sound effects...'):
         if obj["_type"] == "silence":
             audio_se += AudioSegment.silent(duration=int(obj["length"] * spf))
         elif obj["_type"] == "bip":
@@ -531,13 +534,15 @@ def do_audio(sound_effects: List[Dict]):
         music_tracks[-1]["length"] = len_counter
     #     print(music_tracks)
     music_se = AudioSegment.empty()
-    for track in music_tracks:
+    # TODO repeat music after ending
+    for track in tqdm(music_tracks, total=len(music_tracks), desc='creating music...'):
         music_se += AudioSegment.from_mp3(track["src"])[
             : int((track["length"] / fps) * 1000)
         ]
     #     music_se = AudioSegment.from_mp3(sound_effects[0]["src"])[:len(audio_se)]
     #     music_se -= 5
-    final_se = music_se.overlay(audio_se)
+    final_se = audio_se.overlay(music_se)
+    # final_se = audio_se
     final_se.export("final_se.mp3", format="mp3")
 
 
@@ -688,13 +693,21 @@ def comments_to_scene(comments: List, **kwargs):
         polarity = TextBlob(comment.body).sentiment.polarity
         tokens = nlp(comment.body)
         sentences = [sent.string.strip() for sent in tokens.sents]
-        joined_sentences, current_sentence = [], sentences[0]
-        for sentence in sentences[1:]:
+        joined_sentences, current_sentence = [], None
+        for sentence in sentences:
             if len(sentence) > 90:
-                text_chunks = [f"{chunk}..." for chunk in wrap(sentence, 85)]
-                joined_sentences = [*joined_sentences, *text_chunks]
+                text_chunks = []
+                for chunk in wrap(sentence, 85):
+                    if chunk is not None:
+                        if chunk[-1] in string.punctuation:
+                            chunk_text = f"{chunk}"
+                        else:
+                            chunk_text = f"{chunk}..."
+                        text_chunks.append(chunk_text)
+
+                joined_sentences.extend(text_chunks)
             else:
-                if len(f"{current_sentence} {sentence}") <= 90:
+                if current_sentence is not None and len(f"{current_sentence} {sentence}") <= 90:
                     current_sentence += " " + sentence
                 else:
                     joined_sentences.append(current_sentence)
@@ -723,7 +736,7 @@ def comments_to_scene(comments: List, **kwargs):
     change_audio = True
     for character_block in scene:
         scene_objs = []
-        if character_block[0]["objection"] == True:
+        if character_block[0]["objection"]:
             scene_objs.append(
                 {
                     "character": character_block[0]["character"],
@@ -747,6 +760,7 @@ def comments_to_scene(comments: List, **kwargs):
             "location": character_location_map[character_block[0]["character"]],
             "scene": scene_objs,
         }
+        # TODO return to normal audio at end of pressing pursuit
         if change_audio:
             formatted_scene["audio"] = last_audio
             change_audio = False

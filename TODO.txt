@@ -1,0 +1,2 @@
+text overflow on long sentences
+audio cuts out after a minute or two
