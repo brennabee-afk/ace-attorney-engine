@@ -1,12 +1,8 @@
-cython
-spaw
 Pillow
 matplotlib
 opencv-python
 pydub
 moviepy
-ffmpeg
+ffmpeg-python
 spacy
 textblob
-praw
-tinydb
