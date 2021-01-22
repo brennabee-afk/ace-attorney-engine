@@ -1,8 +1,7 @@
 Pillow
-matplotlib
 opencv-python
 pydub
-moviepy
 ffmpeg-python
 spacy
-textblob
+transformers
+tqdm
