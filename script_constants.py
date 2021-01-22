@@ -1,5 +1,5 @@
-
 from enum import IntEnum
+
 
 class Location(IntEnum):
   COURTROOM_LEFT = 1
