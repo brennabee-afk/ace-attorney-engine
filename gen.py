@@ -1,8 +1,8 @@
-
-import os
-from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import engine
+import os
+
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from tqdm import tqdm
 
 
 class Comment(object):

@@ -1,10 +1,10 @@
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 import cv2
-from typing import List, Dict
+import numpy as np
 import os
-import random as r
 import random
+
+from PIL import Image, ImageDraw, ImageFont
+from typing import List, Dict
 
 
 class AnimCache:
@@ -182,7 +182,7 @@ class AnimImg:
     bg_w, bg_h = _background.size
     offset = (self.x, self.y)
     if self.shake_effect:
-      offset = (self.x + r.randint(-1, 1), self.y + r.randint(-1, 1))
+      offset = (self.x + random.randint(-1, 1), self.y + random.randint(-1, 1))
     _background.paste(_img, offset, mask=_img)
     if background is None:
       return _background
